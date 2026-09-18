@@ -18,6 +18,14 @@ GO_CRYPTO_VERSION=0.55.0
 GO_TEXT_VERSION=0.39.0
 GRPC_VERSION=1.83.1
 FULCIO_VERSION=1.8.5
+# `go mod tidy` re-resolves the WHOLE dependency graph, not just the four
+# modules above -- left unconstrained, it cascade-upgrades
+# github.com/docker/docker and github.com/containers/image/v5 to versions
+# whose APIs (archive.Compression, client.ImageLoadOption) apptainer 1.4.5's
+# vendored source doesn't compile against. Pin both to the exact versions
+# already in apptainer 1.4.5's own go.mod so tidy has no reason to move them.
+DOCKER_VERSION=27.5.1
+CONTAINERS_IMAGE_VERSION=5.33.1
 DEB_ARCH="$(dpkg --print-architecture)"
 export DEBIAN_FRONTEND=noninteractive
 
@@ -131,6 +139,8 @@ install_from_source() {
     go get "golang.org/x/text@v${GO_TEXT_VERSION}"
     go get "google.golang.org/grpc@v${GRPC_VERSION}"
     go get "github.com/sigstore/fulcio@v${FULCIO_VERSION}"
+    go get "github.com/docker/docker@v${DOCKER_VERSION}"
+    go get "github.com/containers/image/v5@v${CONTAINERS_IMAGE_VERSION}"
     go mod tidy
     go mod vendor
 
